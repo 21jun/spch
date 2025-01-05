@@ -1,0 +1,5 @@
+mlruns/
+outputs/
+*.egg-info
+.git
+__pycache__/

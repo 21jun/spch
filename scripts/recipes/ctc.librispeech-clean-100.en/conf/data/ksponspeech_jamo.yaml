@@ -1,0 +1,8 @@
+module: prep/ksponspeech_asr/dataset.py # This code should have `prepare_dataset` function
+train_jsonl_paths: ["prep/ksponspeech_asr/data/ksponspeech_jamo_train.jsonl"]
+eval_jsonl_paths: ["prep/ksponspeech_asr/data/ksponspeech_jamo_dev.jsonl"]
+audio_root_path: "/mnt/hdd4/lee1jun/data/KsponSpeech_wav/"
+text_column_name:  text
+eval_metrics: [wer, cer]
+max_train_samples: 10000000
+max_eval_samples: 3000

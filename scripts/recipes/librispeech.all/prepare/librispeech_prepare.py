@@ -37,8 +37,9 @@ def clean_text(text):
 def build_json(path):
     transcripts = load_transcripts(path)
     dirname = os.path.dirname(path)
-    basename = os.path.join(args.output_directory, os.path.basename(path) + os.path.extsep + "yaml")
-
+    basename = os.path.join(
+        args.output_directory, os.path.basename(path) + os.path.extsep + "yaml"
+    )
 
     with open(basename, "w") as fid:
         data = []
@@ -76,7 +77,6 @@ if __name__ == "__main__":
         help="The dataset is saved in <output_directory>/LibriSpeech.",
     )
 
-    
     args = parser.parse_args()
 
     path = os.path.join(args.root_directory, "LibriSpeech")

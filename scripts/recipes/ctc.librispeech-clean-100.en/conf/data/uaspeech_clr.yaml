@@ -1,0 +1,8 @@
+module: prep/uaspeech_asr/dataset_ua_clr.py # This code should have `prepare_dataset` function
+train_jsonl_paths: ["prep/uaspeech_asr/data.old/uaspeech_train_clr+word_id.jsonl"]
+eval_jsonl_paths: ["prep/uaspeech_asr/data.old/uaspeech_test_clr+word_id.jsonl"]
+audio_root_path: "/mnt/hdd4/lee1jun/data/UASpeech/audio/noisereduce/"
+text_column_name:  phn
+eval_metrics: [wer, cer]
+max_train_samples: 10000000
+max_eval_samples: 9999999

@@ -1,0 +1,36 @@
+module: prep/uaspeech_asr/dataset_ua.py # This code should have `prepare_dataset` function
+train_jsonl_paths:
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/C_B1_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/C_B1_UW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/H_B1_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/H_B1_UW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/M_B1_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/M_B1_UW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/L_B1_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/L_B1_UW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/VL_B1_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/VL_B1_UW.jsonl
+
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/C_B2_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/C_B2_UW.jsonl
+  
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/C_B3_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/C_B3_UW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/H_B3_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/H_B3_UW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/M_B3_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/M_B3_UW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/L_B3_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/L_B3_UW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/VL_B3_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/VL_B3_UW.jsonl
+
+eval_jsonl_paths: 
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/VL_B2_CW.jsonl
+  - prep/uaspeech_asr/data/GROUP_BLOCK_WORD/VL_B2_UW.jsonl
+
+audio_root_path: "/mnt/hdd4/lee1jun/data/UASpeech/audio/noisereduce/"
+text_column_name:  phn
+eval_metrics: [wer, cer]
+max_train_samples: 10000000
+max_eval_samples: 9999999

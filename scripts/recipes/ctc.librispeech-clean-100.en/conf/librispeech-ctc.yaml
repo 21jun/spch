@@ -1,0 +1,43 @@
+hydra:
+  job:
+    chdir: False
+
+defaults:
+  - model: wav2vec2-base-960h
+  - data: librispeech_lower_case
+  - train: base
+
+model:
+  # processor_name_or_path: facebook/wav2vec2-base-960h
+  freeze_feature_encoder: true
+  # attention_dropout: 0.1
+  # hidden_dropout: 0.1
+  # vocab_size: 1000
+
+data:
+  name: librispeech_lower_case
+  data_module: scripts/recipes/librispeech.all/prepare/ctc_dataset.py
+
+train:
+  project_name: ctc.librispeech-clean-100.en
+  run_name: ctc.${model.model_name_or_path}.bs-${train.per_device_train_batch_size}.lr-${train.learning_rate}.seed-${train.seed}
+  do_train: true
+  do_eval: true
+  output_dir: ${hydra:run.dir}
+  logging_steps: 2
+  num_epochs: 500
+  learning_rate: 3e-4
+  warmup_steps: 0
+  save_steps: 500
+  eval_steps: 500
+  save_total_limit: 1
+  seed: 777
+  per_device_train_batch_size: 2
+  per_device_eval_batch_size: 2
+  gradient_accumulation_steps: 8
+  evaluation_strategy: steps
+  do_grad_norm_clip: true
+  max_grad_norm: 1.0
+  log_with: mlflow
+  upload_checkpoint: false
+  checkpoint_save_limit: 1
