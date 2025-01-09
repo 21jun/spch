@@ -3,3 +3,4 @@ outputs/
 *.egg-info
 .git
 __pycache__/
+.venv

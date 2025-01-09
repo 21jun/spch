@@ -31,7 +31,7 @@ from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf
 from torch.optim import AdamW
 from torch.utils.data import ConcatDataset, DataLoader, Dataset
-from transformers import (AutoConfig, AutoFeatureExtractor, AutoModelForCTC,
+from transformers import (AutoConfig, AutoFeatureExtractor, AutoModelForSpeechSeq2Seq,
                           AutoProcessor, AutoTokenizer,
                           get_linear_schedule_with_warmup)
 from transformers.trainer_pt_utils import get_model_param_count
@@ -69,27 +69,7 @@ def main(cfg: Dict) -> None:
     processor = AutoProcessor.from_pretrained(cfg.model.processor_name_or_path)
     config = AutoConfig.from_pretrained(cfg.model.model_name_or_path)
 
-    config.update(
-        {
-            "feat_proj_dropout": cfg.model.feat_proj_dropout,
-            "attention_dropout": cfg.model.attention_dropout,
-            "hidden_dropout": cfg.model.hidden_dropout,
-            "final_dropout": cfg.model.final_dropout,
-            "mask_time_prob": cfg.model.mask_time_prob,
-            "mask_time_length": cfg.model.mask_time_length,
-            "mask_feature_prob": cfg.model.mask_feature_prob,
-            "mask_feature_length": cfg.model.mask_feature_length,
-            "layerdrop": cfg.model.layerdrop,
-            "ctc_loss_reduction": cfg.model.ctc_loss_reduction,
-            "ctc_zero_infinity": cfg.model.ctc_zero_infinity,
-            "pad_token_id": processor.tokenizer.pad_token_id,
-            "vocab_size": len(processor.tokenizer),
-            "activation_dropout": cfg.model.activation_dropout,
-            "add_adapter": cfg.model.add_adapter,
-            "ctc_zero_infinity": True,  # should be always True
-        }
-    )
-    model = AutoModelForCTC.from_pretrained(
+    model = AutoModelForSpeechSeq2Seq.from_pretrained(
         cfg.model.model_name_or_path, config=config, ignore_mismatched_sizes=True
     )
 
