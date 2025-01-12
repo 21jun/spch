@@ -3,8 +3,7 @@ import yaml
 from torch.utils.data import ConcatDataset, DataLoader
 from transformers import AutoProcessor
 
-from src.dataset.dataset import (AbstractAudioDataset,
-                                 DataCollatorCTCWithPadding)
+from src.dataset.dataset import AbstractAudioDataset, DataCollatorCTCWithPadding
 
 
 class LibriSpeechDataset(AbstractAudioDataset):
@@ -61,7 +60,9 @@ def prepare(cfg):
             train_list_of_pairs = yaml.load(f, Loader=yaml.FullLoader)
 
         train_datasets.append(
-            LibriSpeechDataset(train_list_of_pairs["data"], cfg.data.audio_root_path, processor)
+            LibriSpeechDataset(
+                train_list_of_pairs["data"], cfg.data.audio_root_path, processor
+            )
         )
 
     train_dataset = ConcatDataset(train_datasets)

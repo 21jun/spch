@@ -32,9 +32,14 @@ from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf
 from torch.optim import AdamW
 from torch.utils.data import ConcatDataset, DataLoader, Dataset
-from transformers import (AutoConfig, AutoFeatureExtractor, AutoModelForCTC,
-                          AutoProcessor, AutoTokenizer,
-                          get_linear_schedule_with_warmup)
+from transformers import (
+    AutoConfig,
+    AutoFeatureExtractor,
+    AutoModelForCTC,
+    AutoProcessor,
+    AutoTokenizer,
+    get_linear_schedule_with_warmup,
+)
 from transformers.trainer_pt_utils import get_model_param_count
 
 # disable UserWarning

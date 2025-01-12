@@ -1,4 +1,4 @@
-python test/train_seq2seq.py \
+uv run test/train_seq2seq.py \
 --model_name_or_path="openai/whisper-small" \
 --dataset_name="mozilla-foundation/common_voice_11_0" \
 --dataset_config_name="hi" \

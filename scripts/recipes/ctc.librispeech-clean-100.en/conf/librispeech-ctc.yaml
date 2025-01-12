@@ -3,7 +3,7 @@ hydra:
     chdir: False
 
 defaults:
-  - model: wav2vec2-base-960h
+  - model: wav2vec2-large-960h-lv60
   - data: librispeech_lower_case
   - train: base
 
@@ -28,8 +28,8 @@ train:
   num_epochs: 500
   learning_rate: 3e-4
   warmup_steps: 0
-  save_steps: 500
-  eval_steps: 500
+  save_steps: 100
+  eval_steps: 100
   save_total_limit: 1
   seed: 777
   per_device_train_batch_size: 2

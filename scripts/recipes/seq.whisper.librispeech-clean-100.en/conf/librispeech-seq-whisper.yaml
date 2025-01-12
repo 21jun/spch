@@ -3,20 +3,21 @@ hydra:
     chdir: False
 
 defaults:
-  - model: whisper-large-v3-turbo
+  - model: whisper-tiny
   - data: librispeech_lower_case
   - train: base
 
 model:
   # processor_name_or_path: facebook/wav2vec2-base-960h
-  freeze_feature_encoder: true
+  freeze_feature_encoder: false
+  freeze_encoder: false
   # attention_dropout: 0.1
   # hidden_dropout: 0.1
   # vocab_size: 1000
 
 data:
   name: librispeech_lower_case
-  data_module: scripts/recipes/seq.whisper.librospeech-clean-100.en/prepare/seq_whisper_dataset.py
+  data_module: scripts/recipes/seq.whisper.librispeech-clean-100.en/prepare/seq_whisper_dataset.py
 
 train:
   project_name: seq.whisper.librispeech-clean-100.en

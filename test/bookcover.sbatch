@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH -J wav2vec2ctc # job name
-#SBATCH -o ./output_%x.%j.out 
-#SBATCH -p RTX6000ADA # queue name or partition name
+#SBATCH -J testrun # job name
+#SBATCH -o ./output_testrun.%j.out 
+#SBATCH -p A5000 # queue name or partition name
 #SBATCH -t 72:00:00 # Run time (hh:mm:ss)
 #SBATCH --gres=gpu:8
 #SBATCH --nodes=1
@@ -18,8 +18,7 @@ export MLFLOW_TRACKING_PASSWORD="1qazxc"
 export MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING=true
 
 export LIBRISPEECH_ROOT=/home1/lee1jun/data/librispeech
-cat scripts/recipes/seq.whisper.librispeech-clean-100.en/train.whisper-tiny.sh
-uv tree
-sh scripts/recipes/seq.whisper.librispeech-clean-100.en/train.whisper-tiny.sh 8
+cat test/finetune.sh
+sh test/finetune.sh
 
 curl  -d "Job finished 😀" ntfy.sh/lee1jun

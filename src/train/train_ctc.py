@@ -31,13 +31,17 @@ from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf
 from torch.optim import AdamW
 from torch.utils.data import ConcatDataset, DataLoader, Dataset
-from transformers import (AutoConfig, AutoFeatureExtractor, AutoModelForCTC,
-                          AutoProcessor, AutoTokenizer,
-                          get_linear_schedule_with_warmup)
+from transformers import (
+    AutoConfig,
+    AutoFeatureExtractor,
+    AutoModelForCTC,
+    AutoProcessor,
+    AutoTokenizer,
+    get_linear_schedule_with_warmup,
+)
 from transformers.trainer_pt_utils import get_model_param_count
 
-from src.dataset.dataset import (AbstractAudioDataset,
-                                 DataCollatorCTCWithPadding)
+from src.dataset.dataset import AbstractAudioDataset, DataCollatorCTCWithPadding
 
 # disable UserWarning
 warnings.simplefilter("ignore", UserWarning)
@@ -54,7 +58,7 @@ def import_module(module_path):
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
 def main(cfg: Dict) -> None:
-    
+
     accelerator = Accelerator(
         log_with="mlflow",
         gradient_accumulation_steps=cfg.train.gradient_accumulation_steps,
@@ -103,10 +107,7 @@ def main(cfg: Dict) -> None:
         dataset_module.prepare(cfg)
     )
 
-
     eval_metrics = {metric: evaluate.load(metric) for metric in cfg.data.eval_metrics}
-
-   
 
     if accelerator.is_main_process:
 
@@ -115,10 +116,14 @@ def main(cfg: Dict) -> None:
             project_name=(
                 cfg.train.project_name if cfg.train.project_name else "default"
             ),
-            init_kwargs={"mlflow": {"run_name": cfg.train.run_name if cfg.train.run_name else None}},
+            init_kwargs={
+                "mlflow": {
+                    "run_name": cfg.train.run_name if cfg.train.run_name else None
+                }
+            },
         )
         mlflow_tracker = accelerator.get_tracker("mlflow", unwrap=True)
-        
+
         run_info = mlflow_tracker.info
         host_url = mlflow.get_tracking_uri()
         experiment_id = run_info.experiment_id
@@ -140,19 +145,25 @@ def main(cfg: Dict) -> None:
         // cfg.train.gradient_accumulation_steps,
     )
 
+    print(train_dataloader)
+    print(eval_dataloaders)
+
     (
         model,
         optimizer,
         train_dataloader,
-        eval_dataloaders,
         lr_scheduler,
     ) = accelerator.prepare(
         model,
         optimizer,
         train_dataloader,
-        eval_dataloaders,
         lr_scheduler,
     )
+    for group, g_dataloader in eval_dataloaders.items():
+        eval_dataloaders[group] = accelerator.prepare(g_dataloader)
+
+    print(eval_dataloaders)
+
 
     # group_dataloaders = {
     #     "librispeech-test-clean": test_clean_dataloader,
@@ -311,7 +322,7 @@ def main(cfg: Dict) -> None:
 
                         labels = batch["labels"]
                         labels[labels == -100] = processor.tokenizer.pad_token_id
-                        labels = processor.batch_decode(labels)
+                        labels = processor.batch_decode(labels,  group_tokens=False)
 
                         predictions = accelerator.gather_for_metrics(predictions)
                         labels = accelerator.gather_for_metrics(labels)
@@ -358,7 +369,10 @@ def main(cfg: Dict) -> None:
 
                 if accelerator.is_main_process:
                     # accelerator.save_state(save_dir / f"checkpoint-{global_step+1}")
-                    accelerator.print("Saving checkpoint...", str(save_dir / f"checkpoint-{global_step+1}"))
+                    accelerator.print(
+                        "Saving checkpoint...",
+                        str(save_dir / f"checkpoint-{global_step+1}"),
+                    )
                     accelerator.unwrap_model(model).save_pretrained(
                         save_dir / f"checkpoint-{global_step+1}"
                     )

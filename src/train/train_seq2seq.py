@@ -31,18 +31,22 @@ from hydra.core.config_store import ConfigStore
 from omegaconf import OmegaConf
 from torch.optim import AdamW
 from torch.utils.data import ConcatDataset, DataLoader, Dataset
-from transformers import (AutoConfig, AutoFeatureExtractor, AutoModelForSpeechSeq2Seq,
-                          AutoProcessor, AutoTokenizer,
-                          get_linear_schedule_with_warmup)
+from transformers import (
+    AutoConfig,
+    AutoFeatureExtractor,
+    AutoModelForSpeechSeq2Seq,
+    AutoProcessor,
+    AutoTokenizer,
+    get_linear_schedule_with_warmup,
+)
 from transformers.trainer_pt_utils import get_model_param_count
 
-from src.dataset.dataset import (AbstractAudioDataset,
-                                 DataCollatorCTCWithPadding)
+from src.dataset.dataset import AbstractAudioDataset, DataCollatorCTCWithPadding
 
 # disable UserWarning
 warnings.simplefilter("ignore", UserWarning)
 warnings.simplefilter("ignore", FutureWarning)
-
+print(f"Torch version: {torch.__version__}")
 
 def import_module(module_path):
     module_name = module_path.split("/")[-1].split(".")[0]
@@ -54,7 +58,7 @@ def import_module(module_path):
 
 @hydra.main(config_path="../conf", config_name="config", version_base=None)
 def main(cfg: Dict) -> None:
-    
+
     accelerator = Accelerator(
         log_with="mlflow",
         gradient_accumulation_steps=cfg.train.gradient_accumulation_steps,
@@ -73,8 +77,15 @@ def main(cfg: Dict) -> None:
         cfg.model.model_name_or_path, config=config, ignore_mismatched_sizes=True
     )
 
+    # if cfg.model.freeze_feature_encoder:
+    # model.freeze_feature_encoder()
+
     if cfg.model.freeze_feature_encoder:
         model.freeze_feature_encoder()
+
+    if cfg.model.freeze_encoder:
+        model.freeze_encoder()
+        model.model.encoder.gradient_checkpointing = False
 
     # Load Dataset
     dataset_module = import_module(cfg.data.data_module)
@@ -83,10 +94,14 @@ def main(cfg: Dict) -> None:
         dataset_module.prepare(cfg)
     )
 
+    # # iter over trian_dataloader to get the first batch
+    # for batch in train_dataloader:
+    #     print(batch)
+    #     break
+
+    # exit()
 
     eval_metrics = {metric: evaluate.load(metric) for metric in cfg.data.eval_metrics}
-
-   
 
     if accelerator.is_main_process:
 
@@ -95,10 +110,14 @@ def main(cfg: Dict) -> None:
             project_name=(
                 cfg.train.project_name if cfg.train.project_name else "default"
             ),
-            init_kwargs={"mlflow": {"run_name": cfg.train.run_name if cfg.train.run_name else None}},
+            init_kwargs={
+                "mlflow": {
+                    "run_name": cfg.train.run_name if cfg.train.run_name else None
+                }
+            },
         )
         mlflow_tracker = accelerator.get_tracker("mlflow", unwrap=True)
-        
+
         run_info = mlflow_tracker.info
         host_url = mlflow.get_tracking_uri()
         experiment_id = run_info.experiment_id
@@ -120,24 +139,26 @@ def main(cfg: Dict) -> None:
         // cfg.train.gradient_accumulation_steps,
     )
 
+    print(train_dataloader)
+    print(eval_dataloaders)
+
     (
         model,
         optimizer,
         train_dataloader,
-        eval_dataloaders,
         lr_scheduler,
     ) = accelerator.prepare(
         model,
         optimizer,
         train_dataloader,
-        eval_dataloaders,
         lr_scheduler,
     )
+    # Each dataloader is prepared separately
+    for group, g_dataloader in eval_dataloaders.items():
+        eval_dataloaders[group] = accelerator.prepare(g_dataloader)
 
-    # group_dataloaders = {
-    #     "librispeech-test-clean": test_clean_dataloader,
-    #     "librispeech-dev-clean": dev_clean_dataloader,
-    # }
+    print(eval_dataloaders)
+
     group_dataloaders = eval_dataloaders
 
     accelerator.register_for_checkpointing(model, optimizer, lr_scheduler)
@@ -278,20 +299,18 @@ def main(cfg: Dict) -> None:
                     prediction_strs = []
                     label_strs = []
                     for inter_step, batch in enumerate(eval_dataloader_with_bar):
-                        # We could avoid this line since we set the accelerator with `device_placement=True`.
-                        batch.to(accelerator.device)
+
                         with torch.no_grad():
-                            outputs = model(**batch)
+                            pred_ids = accelerator.unwrap_model(model).generate(**batch)
+                        
+                        predictions = processor.batch_decode(pred_ids, skip_special_tokens=True)
+                        predictions = [p.strip() for p in predictions]
+                        predictions = [p.lower() for p in predictions]
+                        labels = processor.batch_decode(batch["labels"], skip_special_tokens=True)
+                        labels = [l.strip() for l in labels]
+                        labels = [l.lower() for l in labels]
 
-                        predictions = outputs.logits.argmax(dim=-1)
-                        predictions[predictions == -100] = (
-                            processor.tokenizer.pad_token_id
-                        )
-                        predictions = processor.batch_decode(predictions)
 
-                        labels = batch["labels"]
-                        labels[labels == -100] = processor.tokenizer.pad_token_id
-                        labels = processor.batch_decode(labels)
 
                         predictions = accelerator.gather_for_metrics(predictions)
                         labels = accelerator.gather_for_metrics(labels)
@@ -338,7 +357,10 @@ def main(cfg: Dict) -> None:
 
                 if accelerator.is_main_process:
                     # accelerator.save_state(save_dir / f"checkpoint-{global_step+1}")
-                    accelerator.print("Saving checkpoint...", str(save_dir / f"checkpoint-{global_step+1}"))
+                    accelerator.print(
+                        "Saving checkpoint...",
+                        str(save_dir / f"checkpoint-{global_step+1}"),
+                    )
                     accelerator.unwrap_model(model).save_pretrained(
                         save_dir / f"checkpoint-{global_step+1}"
                     )

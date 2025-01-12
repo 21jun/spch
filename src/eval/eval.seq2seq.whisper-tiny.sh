@@ -1,0 +1,9 @@
+PYTHONPATH=. uv run accelerate launch --num_processes $1 src/eval/eval_seq2seq.py --config-path ../../scripts/recipes/seq.whisper.librispeech-clean-100.en/conf --config-name librispeech-seq-whisper \
+++train.per_device_train_batch_size=16 \
+++train.per_device_eval_batch_size=2 \
+++train.seed=42 \
+++train.gradient_accumulation_steps=1 \
+++train.learning_rate=1e-4 \
+++train.num_epochs=100 \
+++train.eval_steps=1000 \
+data.eval_datasets.dev-clean=scripts/recipes/ctc.librispeech-clean-100.en/data/dev-clean-dummy.yaml
