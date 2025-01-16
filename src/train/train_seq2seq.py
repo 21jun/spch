@@ -269,7 +269,7 @@ def main(cfg: Dict) -> None:
                 accumulated_loss = accumulated_loss.mean().item()
 
                 train_dataloader_with_bar.set_postfix_str(
-                    f"loss: {accumulated_loss:.4f}, global_step: {global_step}, grad_norm: {grad_norm:.4f}"
+                    f"🔥 loss: {accumulated_loss:.4f}, 📉 lr: {optimizer.param_groups[0]['lr']:.6f}, 🐾 global_step: {global_step}, 🌾 grad_norm: {grad_norm:.4f}"
                 )
 
                 if cfg.train.log_with:
