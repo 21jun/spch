@@ -87,9 +87,6 @@ def main(cfg: Dict) -> None:
         model.freeze_encoder()
         model.model.encoder.gradient_checkpointing = False
 
-
-
-
     audio_path = "/mnt/hdd/data/librispeech/LibriSpeech/dev-clean/5338/24615/5338-24615-0000.flac"
 
     # Select an audio file:
@@ -99,7 +96,6 @@ def main(cfg: Dict) -> None:
     input_features = processor(
         waveform.squeeze().numpy(), sampling_rate=sampling_rate, return_tensors="pt"
     ).input_features
-
 
     print("input_features")
     print(input_features.size())
@@ -164,7 +160,6 @@ def main(cfg: Dict) -> None:
     print(type(first_sample["input_features"]))
     print(input_features.size())
 
-
     # covnert first_sample["input_features"] int tensor
     torch_input_features = torch.tensor(first_sample["input_features"]).unsqueeze(0)
 
@@ -180,7 +175,6 @@ def main(cfg: Dict) -> None:
         cf_input_features = batch["input_features"].cpu()
         break
 
-    
     # compare values of cf_input_features and input_features
     print(torch.allclose(cf_input_features, input_features))
 
@@ -203,8 +197,6 @@ def main(cfg: Dict) -> None:
         print("batch")
         print(batch)
 
-        
-        
         ref_text = processor.batch_decode(batch["labels"], skip_special_tokens=True)
         print("ref_text")
         print(ref_text)
@@ -214,8 +206,7 @@ def main(cfg: Dict) -> None:
         batch = batch.to(accelerator.device)
         with torch.no_grad():
             predictions = model.generate(**batch)
-        
-        
+
         print("out@@@@@@@@@@@@@")
         print(predictions.size())
         print(predictions)
@@ -226,17 +217,15 @@ def main(cfg: Dict) -> None:
 
         print(transcription)
 
-
         print("#########")
         print(batch["input_features"][0].unsqueeze(0).size())
 
         with torch.no_grad():
-            predictions = model.generate(batch["input_features"][0].unsqueeze(0), max_length=512)
+            predictions = model.generate(
+                batch["input_features"][0].unsqueeze(0), max_length=512
+            )
         print(predictions)
         print(predictions.size())
-
-
-\
 
         print("🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓🍓")
         input_features = input_features.to(accelerator.device)
@@ -255,7 +244,7 @@ def main(cfg: Dict) -> None:
 
         print(batch["input_features"][0].unsqueeze(0))
         print(batch["input_features"][0].unsqueeze(0).size())
-        
+
         print(input_features)
         print(input_features.size())
 
@@ -263,10 +252,11 @@ def main(cfg: Dict) -> None:
         print(torch.allclose(batch["input_features"][0].unsqueeze(0), input_features))
 
         # get difference between batch["input_features"][0].unsqueeze(0) and input_features
-        print(torch.sum(torch.abs(batch["input_features"][0].unsqueeze(0) - input_features)))
-
-
-
+        print(
+            torch.sum(
+                torch.abs(batch["input_features"][0].unsqueeze(0) - input_features)
+            )
+        )
 
 
 if __name__ == "__main__":

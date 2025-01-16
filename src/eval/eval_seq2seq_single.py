@@ -2,13 +2,16 @@ import torchaudio
 from transformers import WhisperProcessor, WhisperForConditionalGeneration
 
 
-
 # Load the Whisper model in Hugging Face format:
 processor = WhisperProcessor.from_pretrained(f"openai/whisper-tiny")
 model = WhisperForConditionalGeneration.from_pretrained(f"openai/whisper-tiny")
 
 
-audio_path = "/mnt/hdd/data/librispeech/LibriSpeech/dev-clean/5338/24615/5338-24615-0000.flac"
+audio_path = (
+    "/mnt/hdd/data/librispeech/LibriSpeech/dev-clean/5338/24615/5338-24615-0000.flac"
+)
+
+audio_path = "/mnt/hdd/data/KsponSpeech_wav/KsponSpeech_05/KsponSpeech_0621/KsponSpeech_620001.wav"
 
 # Select an audio file:
 waveform, sampling_rate = torchaudio.load(audio_path)
@@ -22,7 +25,7 @@ input_features = processor(
 print("input_features")
 print(input_features.size())
 # Generate token ids
-predicted_ids = model.generate(input_features)
+predicted_ids = model.generate(input_features, language="Korean", task="transcribe")
 
 # Decode token ids to text
 transcription = processor.batch_decode(predicted_ids, skip_special_tokens=True)

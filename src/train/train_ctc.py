@@ -164,7 +164,6 @@ def main(cfg: Dict) -> None:
 
     print(eval_dataloaders)
 
-
     # group_dataloaders = {
     #     "librispeech-test-clean": test_clean_dataloader,
     #     "librispeech-dev-clean": dev_clean_dataloader,
@@ -322,7 +321,7 @@ def main(cfg: Dict) -> None:
 
                         labels = batch["labels"]
                         labels[labels == -100] = processor.tokenizer.pad_token_id
-                        labels = processor.batch_decode(labels,  group_tokens=False)
+                        labels = processor.batch_decode(labels, group_tokens=False)
 
                         predictions = accelerator.gather_for_metrics(predictions)
                         labels = accelerator.gather_for_metrics(labels)

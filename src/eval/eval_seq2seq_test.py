@@ -106,7 +106,6 @@ def main(cfg: Dict) -> None:
         // cfg.train.gradient_accumulation_steps,
     )
 
-
     (
         model,
         optimizer,
@@ -122,27 +121,22 @@ def main(cfg: Dict) -> None:
     for group, g_dataloader in eval_dataloaders.items():
         eval_dataloaders[group] = accelerator.prepare(g_dataloader)
 
-
     group_dataloaders = eval_dataloaders
 
     print("🪼🪼🪼🪼🪼🪼🪼🪼🪼🪼🪼🪼")
     for inter_step, batch in enumerate(eval_dataloaders["librispeech-dev-clean"]):
-  
+
         ref_text = processor.batch_decode(batch["labels"], skip_special_tokens=True)
         print("ref_text")
-    
+
         print(ref_text)
 
         with torch.no_grad():
             predictions = model.generate(**batch)
-        
+
         transcription = processor.batch_decode(predictions, skip_special_tokens=True)
         print("transcription")
         print(transcription)
-
-
-
-
 
 
 if __name__ == "__main__":
