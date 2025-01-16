@@ -10,3 +10,4 @@ text_column_name:  text
 eval_metrics: [wer, cer]
 max_train_samples: 10000000
 max_eval_samples: 3000
+language: "English"
