@@ -10,7 +10,6 @@ from src.dataset.dataset import (
 import torch
 
 
-
 @dataclass
 class DataCollatorSpeechSeq2SeqWithPadding:
     """
@@ -65,7 +64,6 @@ class DataCollatorSpeechSeq2SeqWithPadding:
         return batch
 
 
-
 class LibriSpeechSeq2SeqDataset(AbstractAudioDataset):
 
     def __init__(
@@ -77,9 +75,7 @@ class LibriSpeechSeq2SeqDataset(AbstractAudioDataset):
         max_sample=99999999,
         forward_attention_mask=True,
     ):
-        super().__init__(
-            list_of_pairs, root_dir, max_sample
-        )
+        super().__init__(list_of_pairs, root_dir, max_sample)
         self.processor = processor
         self.max_input_length_in_sec = max_input_length_in_sec
         self.max_sample = max_sample
@@ -135,7 +131,10 @@ def prepare(cfg, processor):
 
         train_datasets.append(
             LibriSpeechSeq2SeqDataset(
-                train_list_of_pairs["data"], cfg.data.audio_root_path, processor, forward_attention_mask
+                train_list_of_pairs["data"],
+                cfg.data.audio_root_path,
+                processor,
+                forward_attention_mask,
             )
         )
 
@@ -157,14 +156,20 @@ def prepare(cfg, processor):
         test_clean_list_of_pairs = yaml.load(f, Loader=yaml.FullLoader)
 
     eval_datasets["librispeech-test-clean"] = LibriSpeechSeq2SeqDataset(
-        test_clean_list_of_pairs["data"], cfg.data.audio_root_path, processor, forward_attention_mask
+        test_clean_list_of_pairs["data"],
+        cfg.data.audio_root_path,
+        processor,
+        forward_attention_mask,
     )
 
     with open(cfg.data.eval_datasets["dev-clean"]) as f:
         dev_clean_list_of_pairs = yaml.load(f, Loader=yaml.FullLoader)
 
     eval_datasets["librispeech-dev-clean"] = LibriSpeechSeq2SeqDataset(
-        dev_clean_list_of_pairs["data"], cfg.data.audio_root_path, processor, forward_attention_mask
+        dev_clean_list_of_pairs["data"],
+        cfg.data.audio_root_path,
+        processor,
+        forward_attention_mask,
     )
 
     train_dataloader = DataLoader(
