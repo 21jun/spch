@@ -112,9 +112,7 @@ class LibriSpeechSeq2SeqDataset(AbstractAudioDataset):
         return sample
 
 
-def prepare(cfg):
-
-    processor = AutoProcessor.from_pretrained(cfg.model.processor_name_or_path)
+def prepare(cfg, processor):
 
     forward_attention_mask = (
         getattr(cfg.model, "apply_spec_augment", False)
