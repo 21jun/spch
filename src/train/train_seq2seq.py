@@ -48,6 +48,7 @@ warnings.simplefilter("ignore", UserWarning)
 warnings.simplefilter("ignore", FutureWarning)
 print(f"Torch version: {torch.__version__}")
 
+
 def import_module(module_path):
     module_name = module_path.split("/")[-1].split(".")[0]
     spec = importlib.util.spec_from_file_location(module_name, module_path)
@@ -87,16 +88,16 @@ def main(cfg: Dict) -> None:
         model.freeze_encoder()
         model.model.encoder.gradient_checkpointing = False
 
-    processor.tokenizer.set_prefix_tokens(language="English", task="transcribe")
-    model.generation_config.language = "English"
+    
+    processor.tokenizer.set_prefix_tokens(language=cfg.data.language, task="transcribe")
+    model.generation_config.language = cfg.data.language
     model.generation_config.task = "transcribe"
-
 
     # Load Dataset
     dataset_module = import_module(cfg.data.data_module)
 
     train_dataloader, eval_dataloaders, train_dataset, eval_datasets = (
-        dataset_module.prepare(cfg, processor) # Set processor
+        dataset_module.prepare(cfg, processor)  # Set processor
     )
 
     # # iter over trian_dataloader to get the first batch
@@ -144,7 +145,6 @@ def main(cfg: Dict) -> None:
         // cfg.train.gradient_accumulation_steps,
     )
 
-
     (
         model,
         optimizer,
@@ -159,7 +159,6 @@ def main(cfg: Dict) -> None:
     # Each dataloader is prepared separately
     for group, g_dataloader in eval_dataloaders.items():
         eval_dataloaders[group] = accelerator.prepare(g_dataloader)
-
 
     group_dataloaders = eval_dataloaders
 
@@ -304,19 +303,20 @@ def main(cfg: Dict) -> None:
 
                         with torch.no_grad():
                             pred_ids = accelerator.unwrap_model(model).generate(**batch)
-                        
-                        predictions = processor.batch_decode(pred_ids, skip_special_tokens=True)
+
+                        predictions = processor.batch_decode(
+                            pred_ids, skip_special_tokens=True
+                        )
                         predictions = [p.strip() for p in predictions]
                         predictions = [p.lower() for p in predictions]
                         # remove special chars
                         predictions = [re.sub(r"[^\w\s]", "", p) for p in predictions]
 
-                        
-                        labels = processor.batch_decode(batch["labels"], skip_special_tokens=True)
+                        labels = processor.batch_decode(
+                            batch["labels"], skip_special_tokens=True
+                        )
                         labels = [l.strip() for l in labels]
                         labels = [l.lower() for l in labels]
-
-
 
                         predictions = accelerator.gather_for_metrics(predictions)
                         labels = accelerator.gather_for_metrics(labels)
