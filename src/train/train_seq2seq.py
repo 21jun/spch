@@ -87,11 +87,16 @@ def main(cfg: Dict) -> None:
         model.freeze_encoder()
         model.model.encoder.gradient_checkpointing = False
 
+    processor.tokenizer.set_prefix_tokens(language="English", task="transcribe")
+    model.generation_config.language = "English"
+    model.generation_config.task = "transcribe"
+
+
     # Load Dataset
     dataset_module = import_module(cfg.data.data_module)
 
     train_dataloader, eval_dataloaders, train_dataset, eval_datasets = (
-        dataset_module.prepare(cfg)
+        dataset_module.prepare(cfg, processor) # Set processor
     )
 
     # # iter over trian_dataloader to get the first batch
@@ -139,8 +144,6 @@ def main(cfg: Dict) -> None:
         // cfg.train.gradient_accumulation_steps,
     )
 
-    print(train_dataloader)
-    print(eval_dataloaders)
 
     (
         model,
@@ -157,7 +160,6 @@ def main(cfg: Dict) -> None:
     for group, g_dataloader in eval_dataloaders.items():
         eval_dataloaders[group] = accelerator.prepare(g_dataloader)
 
-    print(eval_dataloaders)
 
     group_dataloaders = eval_dataloaders
 
@@ -306,6 +308,10 @@ def main(cfg: Dict) -> None:
                         predictions = processor.batch_decode(pred_ids, skip_special_tokens=True)
                         predictions = [p.strip() for p in predictions]
                         predictions = [p.lower() for p in predictions]
+                        # remove special chars
+                        predictions = [re.sub(r"[^\w\s]", "", p) for p in predictions]
+
+                        
                         labels = processor.batch_decode(batch["labels"], skip_special_tokens=True)
                         labels = [l.strip() for l in labels]
                         labels = [l.lower() for l in labels]
