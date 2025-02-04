@@ -1,0 +1,13 @@
+train_datasets: 
+  - scripts/recipes/ctc.librispeech-clean-100.en/data/train-clean-100.yaml
+eval_datasets:
+  dev-clean: scripts/recipes/ctc.librispeech-clean-100.en/data/dev-clean.yaml
+  test-clean: scripts/recipes/ctc.librispeech-clean-100.en/data/test-clean.yaml
+# audio_root_path: "/mnt/hdd/data/librispeech/""/mnt/hdd/data/librispeech/"
+audio_root_path: ${oc.env:LIBRISPEECH_ROOT}
+data_module: scripts/recipes/librispeech.all/prepare/seq_whisper_dataset.py
+text_column_name:  text
+eval_metrics: [wer, cer]
+max_train_samples: 10000000
+max_eval_samples: 3000
+language: "English"

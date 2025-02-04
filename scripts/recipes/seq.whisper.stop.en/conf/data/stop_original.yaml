@@ -1,0 +1,13 @@
+train_datasets: 
+  - scripts/recipes/seq.whisper.stop.en/data/train.yaml
+eval_datasets:
+  stop-eval: scripts/recipes/seq.whisper.stop.en/data/eval.yaml
+  stop-test: scripts/recipes/seq.whisper.stop.en/data/test_dummy.yaml
+# audio_root_path: "/mnt/hdd/data/librispeech/""/mnt/hdd/data/librispeech/"
+audio_root_path: ${oc.env:STOP_ROOT}
+data_module: scripts/recipes/seq.whisper.stop.en/prepare/seq_whisper_dataset.py
+text_column_name:  text
+eval_metrics: [wer, cer]
+max_train_samples: 10000000
+max_eval_samples: 1000000
+language: "English"
