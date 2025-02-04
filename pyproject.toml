@@ -23,3 +23,6 @@ dependencies = [
     "torchvision>=0.20.1",
     "transformers>=4.47.1",
 ]
+
+[tool.uv.workspace]
+members = ["new"]
