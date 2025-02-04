@@ -88,7 +88,6 @@ def main(cfg: Dict) -> None:
         model.freeze_encoder()
         model.model.encoder.gradient_checkpointing = False
 
-    
     processor.tokenizer.set_prefix_tokens(language=cfg.data.language, task="transcribe")
     model.generation_config.language = cfg.data.language
     model.generation_config.task = "transcribe"
